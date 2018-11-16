@@ -1,20 +1,28 @@
-# 538_pred_results
+---
+title: "Tidy Template"
+author: "Fabio Votta"
+date: "The Date"
+output: github_document
+---
 
-Assessing the 538 Predictions for the 2018 Midterm Elections
 
-## Packages
 
-``` r
+## Packages 
+
+```{r}
 # Install these packages if you don't have them yet
 # if (!require("pacman")) install.packages("pacman")
 # devtools::install_github("favstats/tidytemplate")
 
 pacman::p_load(tidyverse, tidytemplate, janitor, ggthemes, ggpubr, rvest, ggrepel)
+
+
 ```
+
 
 ## Load Data
 
-``` r
+```{r, data}
 csv_link <- "https://blogs.sciencemag.org/sciencehound/wp-content/uploads/sites/5/2018/11/Congressional-election-results-and-forecasts.csv"
 
 pred_dat <- read_csv(csv_link) %>% 
@@ -22,34 +30,14 @@ pred_dat <- read_csv(csv_link) %>%
   mutate(close = ifelse(election_results <= 55 & election_results >= 45, "Close", "Safe")) %>% 
   left_join(tibble(state = state.name, abbr =state.abb)) %>% 
   mutate(distr_abbr = paste0(abbr, district))
-```
 
-
-``` r
 pred_dat
 ```
 
-    ## # A tibble: 435 x 14
-    ##    state district democratic_cand~ republican_cand~ election_results
-    ##    <chr>    <int> <chr>            <chr>                       <dbl>
-    ##  1 Alab~        1 Kennedy          Byrne                        36.7
-    ##  2 Alab~        2 Isner            Roby                         38.5
-    ##  3 Alab~        3 Hagan            Rogers                       36.2
-    ##  4 Alab~        4 Auman            Aderholt                     20.1
-    ##  5 Alab~        5 Joffrion         Brooks                       38.9
-    ##  6 Alab~        6 Kline            Palmer                       30.7
-    ##  7 Alab~        7 Sewell           -                           100  
-    ##  8 Alas~        1 Glavin           Young                        46  
-    ##  9 Ariz~        1 O'Halleran       Rogers                       53.8
-    ## 10 Ariz~        2 Kirkpatrick      Peterson                     54.4
-    ## # ... with 425 more rows, and 9 more variables: predicted_lite <dbl>,
-    ## #   predicted_classic <dbl>, predicted_deluxe <dbl>,
-    ## #   predicted_probability_deluxe <dbl>, correct_deluxe <int>,
-    ## #   democratic_win <int>, close <chr>, abbr <chr>, distr_abbr <chr>
 
 ## How did 538 Predictions fare in the 2018 Midterm Elections?
 
-``` r
+```{r}
 text_dat <- pred_dat %>% 
   count(correct_deluxe) %>%
   spread(correct_deluxe, n) %>% 
@@ -75,17 +63,14 @@ pred_dat %>%
   guides(color = F)  +
   theme(plot.title = element_text(size = 13, face = "bold"),
     plot.subtitle = element_text(size = 11, face = "italic"))
-```
-
-![](538_preds_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
-
-``` r
+  
 ggsave_it(pred1, width = 10, height = 6)
+  
 ```
 
 ## How did 538 Predictions fare in the 2018 Midterm Elections? - Close Races
 
-``` r
+```{r}
 pred_dat %>% 
   ggplot(aes(predicted_deluxe, election_results)) +
   geom_point(aes(color = close)) +
@@ -104,17 +89,16 @@ pred_dat %>%
   guides(color = F)  +
   theme(plot.title = element_text(size = 13, face = "bold"),
     plot.subtitle = element_text(size = 11, face = "italic"))
-```
-
-![](538_preds_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
-
-``` r
+  
+  
 ggsave_it(pred2, width = 10, height = 6)
 ```
 
+
 ## How did 538 Predictions fare in the 2018 Midterm Elections? - Close Races II
 
-``` r
+
+```{r, analysis}
 pred_dat %>% 
   mutate(correct_deluxe = as.factor(correct_deluxe)) %>% 
   filter(close == "Close") %>% 
@@ -136,17 +120,15 @@ pred_dat %>%
   guides(color = F)  +
   theme(plot.title = element_text(size = 13, face = "bold"),
     plot.subtitle = element_text(size = 11, face = "italic"))
-```
-
-![](538_preds_files/figure-gfm/analysis-1.png)<!-- -->
-
-``` r
+  
 ggsave_it(pred3, width = 10, height = 6)
+
 ```
 
 ## How did 538 Predictions fare in the 2018 Midterm Elections? - Prediction
 
-``` r
+
+```{r}
 hist_dat <- pred_dat %>% 
   mutate(diff = abs(election_results - predicted_deluxe)) %>% 
   arrange(desc(diff)) 
@@ -165,14 +147,7 @@ hist_dat %>%
        caption = "favstats.eu; @favstats\nData: @jeremymberg")  +
   guides(color = F)  +
   theme(plot.title = element_text(size = 13, face = "bold"))
-```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-![](538_preds_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
-``` r
 ggsave_it(pred4, width = 10, height = 6)
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
